@@ -1,0 +1,40 @@
+networks:
+  subs-network:
+    driver: bridge
+
+services:
+  subs-server:
+    build:
+      context: ./
+      dockerfile: ./cmd/server/Dockerfile
+    container_name: subs-server
+    networks:
+      - subs-network
+    env_file:
+      - ./.env
+    ports:
+      - "9090:8080"
+  
+  subs-migrators:
+    build:
+      context: ./
+      dockerfile: ./cmd/migrator/Dockerfile
+    container_name: subs-migrators
+    networks:
+      - subs-network
+    env_file:
+      - ./.env
+    ports:
+      - "9091:8080"
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - subs-network
+    ports:
+      - "6432:5432"
+    restart: unless-stopped
